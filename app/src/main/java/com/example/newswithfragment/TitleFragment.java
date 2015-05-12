@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +19,29 @@ import java.util.List;
 public class TitleFragment extends Fragment {
     TitleAdapter titleAdapter;
     ListView listView;
-    List<News> list=new ArrayList<News>();
+    List<News> list = new ArrayList<News>();
     boolean isSingle;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.title_layout, container, false);
-        Log.d("ddd",view.toString());
+        View view = inflater.inflate(R.layout.title_layout, container, false);
+        listView = (ListView) view.findViewById(R.id.title_list_view);
+        listView.setAdapter(titleAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                News news = list.get(position);
+                String title = news.getTitle();
+                String content = news.getContent();
+                if (isSingle) {
+                    ContentActivity.onActionStart(getActivity(), title, content);
+                } else {
+                    ContentFragment contentFragment=(ContentFragment)getFragmentManager().findFragmentById(R.id.content_fragment);
+                    contentFragment.refresh(title,content);
+                }
+            }
+        });
         return view;
     }
 
@@ -35,11 +49,11 @@ public class TitleFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         initNews();
-        titleAdapter=new TitleAdapter(activity,R.layout.title_item,list);
+        titleAdapter = new TitleAdapter(activity, R.layout.title_item, list);
     }
 
-    public void initNews(){
-        News n1=new News("新华网明斯克5月11日电(记者刘华 柳丝)国家主席习近平11日同白俄罗斯总统卢卡申科在明斯克卫国战争历史博物馆会见了15名白俄罗斯第二次世界大战老战士代表。\n" +
+    public void initNews() {
+        News n1 = new News("新华网明斯克5月11日电(记者刘华 柳丝)国家主席习近平11日同白俄罗斯总统卢卡申科在明斯克卫国战争历史博物馆会见了15名白俄罗斯第二次世界大战老战士代表。\n" +
                 "\n" +
                 "　　15名老战士中年龄最大的已95岁，最小的也已88岁。他们中有11人曾在中国东北参加中国军民对日本作战，为中国人民抗日战争胜利作出了积极贡献。\n" +
                 "\n" +
@@ -54,55 +68,29 @@ public class TitleFragment extends Fragment {
                 "\n" +
                 "　　当天，习近平还向白俄罗斯胜利纪念碑敬献花圈。\n" +
                 "\n" +
-                "　　王沪宁、栗战书、杨洁篪等参加上述活动。","习近平会见白俄罗斯二战老战士代表");
-        News n2=new News("新华社北京5月11日电 外交部发言人华春莹11日宣布：应巴西联邦共和国总统罗塞夫、哥伦比亚共和国总统桑托斯、秘鲁共和国总统乌马拉、智利共和国总统巴切莱特邀请，国务院总理李克强将于5月18日至26日对上述四国进行正式访问。(完)\n" +
+                "　　王沪宁、栗战书、杨洁篪等参加上述活动。", "习近平会见白俄罗斯二战老战士代表");
+        News n2 = new News("新华社北京5月11日电 外交部发言人华春莹11日宣布：应巴西联邦共和国总统罗塞夫、哥伦比亚共和国总统桑托斯、秘鲁共和国总统乌马拉、智利共和国总统巴切莱特邀请，国务院总理李克强将于5月18日至26日对上述四国进行正式访问。(完)\n" +
                 "\n" +
-                "编辑：SN117","李克强将访问巴西哥伦比亚秘鲁智利等南美四国");
+                "编辑：SN117", "李克强将访问巴西哥伦比亚秘鲁智利等南美四国");
         list.add(n1);
         list.add(n2);
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (getActivity().findViewById(R.id.content_fragment) == null) {
+            isSingle = true;
+        } else {
+            isSingle = false;
+        }
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d("ddd", view.toString());
-        if(view.findViewById(R.id.content_fragment)==null)
-        {
-            isSingle=true;
-        }
-        else
-        {
-            isSingle=false;
-        }
-
-        listView=(ListView)view.findViewById(R.id.title_list_view);
-        listView.setAdapter(titleAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                News news=list.get(position);
-                String title=news.getTitle();
-                String content=news.getContent();
-                Log.d("ddd",isSingle+"");
-                if (isSingle)
-                {
-                    ContentActivity.onActionStart(getActivity(),title,content);
-                }
-                else
-                {
-                    ContentFragment contentFragment=(ContentFragment)getFragmentManager().findFragmentById(R.id.content_content);
-                    TextView titleText=(TextView)view.findViewById(R.id.content_title);
-                    TextView contentText=(TextView)view.findViewById(R.id.content_content);
 
 
-                    titleText.setText(title);
-                    contentText.setText(content);
-
-
-
-                }
-            }
-        });
     }
 
 }
